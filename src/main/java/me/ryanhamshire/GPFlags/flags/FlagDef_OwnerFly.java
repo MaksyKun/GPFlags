@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +20,7 @@ public class FlagDef_OwnerFly extends FlagDefinition {
     @Override
     public void onFlagSet(Claim claim, String param) {
         UUID uuid = claim.ownerID;
+        if (uuid == null) return;
         Player owner = Bukkit.getPlayer(uuid);
         if (owner == null) return;
         Location location = owner.getLocation();
@@ -30,6 +31,7 @@ public class FlagDef_OwnerFly extends FlagDefinition {
     @Override
     public void onFlagUnset(Claim claim) {
         UUID uuid = claim.ownerID;
+        if (uuid == null) return;
         Player owner = Bukkit.getPlayer(uuid);
         if (owner == null) {
             return;
@@ -38,7 +40,7 @@ public class FlagDef_OwnerFly extends FlagDefinition {
         if (!claim.contains(location, false, false)) {
             return;
         }
-        FlightManager.managePlayerFlight(owner, null, owner.getLocation());
+        FlightManager.manageFlightLater(owner, 1, owner.getLocation());
     }
 
     public static boolean letPlayerFly(Player player, Location location, Claim claim) {
@@ -65,9 +67,8 @@ public class FlagDef_OwnerFly extends FlagDefinition {
 
     @Override
     public List<FlagType> getFlagType() {
-        return Collections.singletonList(FlagType.CLAIM);
+        return Arrays.asList(FlagType.CLAIM, FlagType.DEFAULT);
     }
-
 
 }
 

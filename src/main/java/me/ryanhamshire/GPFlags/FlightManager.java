@@ -72,7 +72,19 @@ public class FlightManager implements Listener {
 
     @EventHandler
     public void onEnterNewClaim(PlayerPostClaimBorderEvent event) {
-        manageFlightLater(event.getPlayer(), 1, event.getLocFrom());
+        // Get the status at their old location
+        Location locFrom = event.getLocFrom();
+        Location locTo = event.getLocTo();
+        Player player = event.getPlayer();
+        Claim fromClaim = event.getClaimFrom();
+        Claim toClaim = event.getClaimTo();
+        Boolean oldFlightAllowedStatus = gpfAllowsFlight(player, locFrom, fromClaim);
+
+        // A tick later, do a check on their new location and compare the two values
+        Bukkit.getScheduler().runTaskLater(GPFlags.getInstance(), () -> {
+            Boolean newFlightAllowedStatus = gpfAllowsFlight(player, locTo, toClaim);
+            managePlayerFlight(player, oldFlightAllowedStatus, newFlightAllowedStatus);
+        }, 1);
     }
 
     @EventHandler
@@ -101,9 +113,11 @@ public class FlightManager implements Listener {
         }
         // if oldLocation is passed in, we want to calculate that value immediately
         PlayerData playerData = GriefPrevention.instance.dataStore.getPlayerData(player.getUniqueId());
-        Boolean oldFlightAllowedStatus = gpfAllowsFlight(player, oldLocation, playerData.lastClaim);
+        Claim oldClaim = GriefPrevention.instance.dataStore.getClaimAt(oldLocation, false, playerData.lastClaim);
+        Boolean oldFlightAllowedStatus = gpfAllowsFlight(player, oldLocation, oldClaim);
         Bukkit.getScheduler().runTaskLater(GPFlags.getInstance(), () -> {
-            Boolean newFlightAllowedStatus = gpfAllowsFlight(player, player.getLocation(), playerData.lastClaim);
+            Claim newClaim = GriefPrevention.instance.dataStore.getClaimAt(player.getLocation(), false, playerData.lastClaim);
+            Boolean newFlightAllowedStatus = gpfAllowsFlight(player, player.getLocation(), newClaim);
             managePlayerFlight(player, oldFlightAllowedStatus, newFlightAllowedStatus);
         }, ticks);
     }
@@ -143,11 +157,10 @@ public class FlightManager implements Listener {
      * Checks if a flag is the reason that the player allows flight at a location
      * @param player
      * @param location
-     * @param cachedClaim
+     * @param claim Claim at location. Helpful in case a claim is being deleted
      * @return
      */
-    private static Boolean gpfAllowsFlight(Player player, Location location, Claim cachedClaim) {
-        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(location, false, cachedClaim);
+    private static Boolean gpfAllowsFlight(Player player, Location location, Claim claim) {
         boolean manageFlight = gpfManagesFlight(player);
         if (manageFlight) {
             if (FlagDef_OwnerMemberFly.letPlayerFly(player, location, claim)) {
@@ -172,8 +185,8 @@ public class FlightManager implements Listener {
     /**
      * If there's a difference in the two booleans, will set the player's flight to the new status
      * @param player
-     * @param flightAllowedAtOldLocation
-     * @param flightAllowedAtNewLocation
+     * @param flightAllowedAtOldLocation Null means no flags to indicate
+     * @param flightAllowedAtNewLocation Null means no flags to indicate
      */
     private static void managePlayerFlight(@NotNull Player player, @Nullable Boolean flightAllowedAtOldLocation, @Nullable Boolean flightAllowedAtNewLocation) {
         if (flightAllowedAtNewLocation == null) {
@@ -184,15 +197,19 @@ public class FlightManager implements Listener {
             }
             return;
         }
-        if (flightAllowedAtNewLocation) {
-            turnOnFlight(player);
-        } else {
+        if (flightAllowedAtNewLocation == Boolean.TRUE) {
+            if (gpfManagesFlight(player)) {
+                turnOnFlight(player);
+            }
+            return;
+        }
+        if (flightAllowedAtNewLocation == Boolean.FALSE) {
             turnOffFlight(player);
         }
     }
 
     @EventHandler
-    public void onFlyToggle(PlayerToggleFlightEvent event) {
+    private void onFlyToggle(PlayerToggleFlightEvent event) {
         Player player = event.getPlayer();
         Location location = player.getLocation();
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(location, false, null);
