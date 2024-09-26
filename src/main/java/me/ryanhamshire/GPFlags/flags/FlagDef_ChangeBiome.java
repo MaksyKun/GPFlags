@@ -1,10 +1,6 @@
 package me.ryanhamshire.GPFlags.flags;
 
-import me.ryanhamshire.GPFlags.FlagManager;
-import me.ryanhamshire.GPFlags.GPFlags;
-import me.ryanhamshire.GPFlags.MessageSpecifier;
-import me.ryanhamshire.GPFlags.Messages;
-import me.ryanhamshire.GPFlags.SetFlagResult;
+import me.ryanhamshire.GPFlags.*;
 import me.ryanhamshire.GPFlags.util.MessagingUtil;
 import me.ryanhamshire.GPFlags.util.Util;
 import me.ryanhamshire.GriefPrevention.Claim;
@@ -122,12 +118,12 @@ public class FlagDef_ChangeBiome extends FlagDefinition {
         greater.setY(Util.getMaxHeight(greater));
         Location lesser = claim.getLesserBoundaryCorner();
 
-        int lX = (int) lesser.getX();
-        int lY = (int) lesser.getY();
-        int lZ = (int) lesser.getZ();
-        int gX = (int) greater.getX();
-        int gY = (int) greater.getY();
-        int gZ = (int) greater.getZ();
+        int lX = lesser.getBlockX();
+        int lY = lesser.getBlockY();
+        int lZ = lesser.getBlockZ();
+        int gX = greater.getBlockX();
+        int gY = greater.getBlockY();
+        int gZ = greater.getBlockZ();
         World world = lesser.getWorld();
         int ticks = 0;
         for (int x = lX; x < gX; x++) {
@@ -164,13 +160,14 @@ public class FlagDef_ChangeBiome extends FlagDefinition {
 
     @EventHandler
     public void onClaimDelete(ClaimDeletedEvent e) {
-        if (e.getClaim().parent != null) {
-            // todo here is where we'd get the parent's flag and set the inner biome to that
+        Claim claim = e.getClaim();
+        Claim parent = claim.parent;
+        if (parent != null) {
+            Flag flag = getEffectiveFlag(parent, parent.getLesserBoundaryCorner().getWorld());
+            changeBiome(Bukkit.getConsoleSender(), claim, flag.parameters);
             return;
         }
-        Claim claim = e.getClaim();
-        FlagManager fm = GPFlags.getInstance().getFlagManager();
-        if (fm.getEffectiveFlag(claim.getLesserBoundaryCorner(), this.getName(), claim) == null) return;
+        if (getEffectiveFlag(claim, claim.getLesserBoundaryCorner().getWorld()) == null) return;
 
         resetBiome(claim);
     }

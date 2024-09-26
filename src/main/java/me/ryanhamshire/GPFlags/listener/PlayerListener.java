@@ -86,7 +86,7 @@ public class PlayerListener implements Listener {
         Bukkit.getPluginManager().callEvent(borderEvent);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     private void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
         Location spawn = event.getRespawnLocation();
@@ -111,16 +111,23 @@ public class PlayerListener implements Listener {
             return false;
         }
 
+        if (players.isEmpty()) return false;
         Location locFromAdj = Util.getInBoundsLocation(locFrom);
         Location locToAdj = Util.getInBoundsLocation(locTo);
-        if (players.isEmpty()) return false;
-        Player rando = (Player) players.toArray()[0];
-        if (rando == null) return false;
-        Claim lastClaim = dataStore.getPlayerData(rando.getUniqueId()).lastClaim;
-        Claim claimFrom = dataStore.getClaimAt(locFromAdj, false, lastClaim);
+        Claim claimFrom = dataStore.getClaimAt(locFromAdj, false, null);
         Claim claimTo = dataStore.getClaimAt(locToAdj, false, null);
-        if (claimTo == claimFrom) return false;
+        if (claimTo == claimFrom) {
+            // If both claims exist and are the same, there's no context change
+            if (claimTo != null) {
+                return false;
+            }
+            // If both claims are null and are the same world, there's no context change
+            if (locFrom.getWorld() == locTo.getWorld()) {
+                return false;
+            }
+        }
 
+        // validate that the entire manifest is allowed to move to the location
         ArrayList<PlayerPreClaimBorderEvent> events = new ArrayList<>();
         for (Player passenger : players) {
             PlayerPreClaimBorderEvent event = new PlayerPreClaimBorderEvent(passenger, claimFrom, claimTo, locFromAdj, locToAdj);
@@ -129,7 +136,7 @@ public class PlayerListener implements Listener {
             events.add(event);
         }
 
-        // Now that we know everyone is allowed entry, lets call postclaimborderevent
+        // Now that we know everyone is allowed entry, lets call PlayerPostClaimBorderEvent
         for (PlayerPreClaimBorderEvent event : events) {
             Bukkit.getPluginManager().callEvent(new PlayerPostClaimBorderEvent(event));
         }

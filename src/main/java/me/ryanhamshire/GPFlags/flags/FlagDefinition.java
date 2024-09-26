@@ -18,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -48,7 +49,9 @@ public abstract class FlagDefinition implements Listener {
 
     public abstract MessageSpecifier getUnSetMessage();
 
-    public abstract List<FlagType> getFlagType();
+    public List<FlagType> getFlagType() {
+        return Arrays.asList(FlagType.CLAIM, FlagType.DEFAULT, FlagType.WORLD, FlagType.SERVER);
+    }
 
     // Called when a flag is set to false/true, etc.
     public void onFlagSet(Claim claim, String params) {
@@ -65,11 +68,13 @@ public abstract class FlagDefinition implements Listener {
      * @return Logical instance of flag at location
      */
     public Flag getFlagInstanceAtLocation(@NotNull Location location, @Nullable Player player) {
-        if (player != null) {
+        if (cachedClaim == null && player != null) {
             PlayerData playerData = GriefPrevention.instance.dataStore.getPlayerData(player.getUniqueId());
             cachedClaim = playerData.lastClaim;
         }
-        return flagManager.getEffectiveFlag(location, this.getName(), cachedClaim);
+        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(location, false, false, cachedClaim);
+        cachedClaim = claim;
+        return flagManager.getEffectiveFlag(location, this.getName(), claim);
     }
 
     public Flag getEffectiveFlag(@Nullable Claim claim, @NotNull World world) {
@@ -90,7 +95,7 @@ public abstract class FlagDefinition implements Listener {
     private boolean hasRegisteredEvents = false;
     
     public void firstTimeSetup() {
-        if(hasRegisteredEvents) return;
+        if (hasRegisteredEvents) return;
         hasRegisteredEvents = true;
         Bukkit.getServer().getPluginManager().registerEvents(this, this.plugin);
     }
@@ -114,7 +119,11 @@ public abstract class FlagDefinition implements Listener {
         /**
          * Flag can bet set for the entire server
          */
-        SERVER("<dark_aqua>SERVER");
+        SERVER("<dark_aqua>SERVER"),
+        /**
+         * Flag can be set as a default flag
+         */
+        DEFAULT("<YELLOW>DEFAULT");
 
         String name;
 

@@ -5,7 +5,8 @@ import me.ryanhamshire.GPFlags.util.Util;
 import me.ryanhamshire.GriefPrevention.Claim;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import java.util.Collections;
+
+import java.util.Arrays;
 import java.util.List;
 
 public class FlagDef_OwnerMemberFly extends FlagDefinition {
@@ -24,7 +25,7 @@ public class FlagDef_OwnerMemberFly extends FlagDefinition {
     @Override
     public void onFlagUnset(Claim claim) {
         for (Player p : Util.getPlayersIn(claim)) {
-            FlightManager.managePlayerFlight(p, null, p.getLocation());
+            FlightManager.manageFlightLater(p, 1, p.getLocation());
         }
     }
 
@@ -54,8 +55,7 @@ public class FlagDef_OwnerMemberFly extends FlagDefinition {
 
     @Override
     public List<FlagType> getFlagType() {
-        return Collections.singletonList(FlagType.CLAIM);
+        return Arrays.asList(FlagType.CLAIM, FlagType.DEFAULT);
     }
-
 
 }
