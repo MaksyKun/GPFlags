@@ -111,7 +111,7 @@ public class Util {
     public static boolean isMonster(Entity entity) {
         EntityType type = entity.getType();
         return (entity instanceof Monster || type == EntityType.GHAST || type == EntityType.MAGMA_CUBE || type == EntityType.SHULKER
-                || type == EntityType.PHANTOM || type == EntityType.SLIME || type == EntityType.HOGLIN);
+                || type == EntityType.PHANTOM || type == EntityType.SLIME || type == EntityType.HOGLIN || type == EntityType.PIGLIN || type == EntityType.PIGLIN_BRUTE);
     }
 
     public static boolean canAccess(Claim claim, Player player) {

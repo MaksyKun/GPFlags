@@ -53,6 +53,8 @@ public class CommandBuyBuildTrust implements CommandExecutor {
                 }
                 if (claim.ownerID != null) {
                     VaultHook.giveMoney(claim.ownerID, cost);
+                } else if(claim.parent != null && claim.parent.ownerID != null) {
+                    VaultHook.giveMoney(claim.parent.ownerID, cost);
                 }
                 claim.setPermission(player.getUniqueId().toString(), ClaimPermission.Build);
                 GriefPrevention.instance.dataStore.saveClaim(claim);

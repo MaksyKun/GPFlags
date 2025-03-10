@@ -58,6 +58,8 @@ public class CommandBuySubclaim implements CommandExecutor {
         }
         if (claim.ownerID != null) {
             VaultHook.giveMoney(claim.ownerID, cost);
+        } else if(claim.parent != null && claim.parent.ownerID != null) {
+            VaultHook.giveMoney(claim.parent.ownerID, cost);
         }
         
         // Give the player build trust and managetrust in the subclaim
