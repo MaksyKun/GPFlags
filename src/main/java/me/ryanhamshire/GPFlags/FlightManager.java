@@ -160,7 +160,7 @@ public class FlightManager implements Listener {
      * @param claim Claim at location. Helpful in case a claim is being deleted
      * @return
      */
-    private static Boolean gpfAllowsFlight(Player player, Location location, Claim claim) {
+    public static Boolean gpfAllowsFlight(Player player, Location location, Claim claim) {
         boolean manageFlight = gpfManagesFlight(player);
         if (manageFlight) {
             if (FlagDef_OwnerMemberFly.letPlayerFly(player, location, claim)) {
@@ -229,7 +229,10 @@ public class FlightManager implements Listener {
         MessagingUtil.sendMessage(player, TextMode.Err, Messages.CantFlyHere);
         player.setFlying(false);
         player.setAllowFlight(false);
+        considerForFallImmunity(player);
+    }
 
+    public static void considerForFallImmunity(Player player) {
         Location location = player.getLocation();
         Block floor = getFloor(location.getBlock());
         if (location.getY() - floor.getY() >= 4) {

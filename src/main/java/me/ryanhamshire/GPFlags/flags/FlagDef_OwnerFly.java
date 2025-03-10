@@ -19,7 +19,7 @@ public class FlagDef_OwnerFly extends FlagDefinition {
 
     @Override
     public void onFlagSet(Claim claim, String param) {
-        UUID uuid = claim.ownerID;
+        UUID uuid = claim.getOwnerID();
         if (uuid == null) return;
         Player owner = Bukkit.getPlayer(uuid);
         if (owner == null) return;
@@ -30,7 +30,7 @@ public class FlagDef_OwnerFly extends FlagDefinition {
 
     @Override
     public void onFlagUnset(Claim claim) {
-        UUID uuid = claim.ownerID;
+        UUID uuid = claim.getOwnerID();
         if (uuid == null) return;
         Player owner = Bukkit.getPlayer(uuid);
         if (owner == null) {
@@ -47,7 +47,7 @@ public class FlagDef_OwnerFly extends FlagDefinition {
         if (claim == null) return false;
         Flag flag = GPFlags.getInstance().getFlagManager().getEffectiveFlag(location, "OwnerFly", claim);
         if (flag == null) return false;
-        return Util.canEdit(player, claim);
+        return (player.getUniqueId().equals(claim.getOwnerID()));
     }
 
     @Override

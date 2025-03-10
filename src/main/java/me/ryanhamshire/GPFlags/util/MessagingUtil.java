@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Matcher;
@@ -16,17 +17,6 @@ import java.util.regex.Pattern;
 import static org.bukkit.ChatColor.COLOR_CHAR;
 
 public class MessagingUtil {
-
-     /**
-      * Fills in message params, adds formatting, and sends it to the receiver.
-     * @param receiver person to get message or null if console
-     * @param messageID
-     * @param args
-     */
-    public static void sendMessage(@Nullable CommandSender receiver, Messages messageID, String... args) {
-        String message = GPFlags.getInstance().getFlagsDataStore().getMessage(messageID, args);
-        sendMessage(receiver, message);
-    }
 
     /**
      * Send a {@link Messages Message} to a player, or console if player is null
@@ -38,10 +28,12 @@ public class MessagingUtil {
      */
     public static void sendMessage(@Nullable CommandSender receiver, String color, Messages messageID, String... args) {
         String message = GPFlags.getInstance().getFlagsDataStore().getMessage(messageID, args);
+        if (message.isEmpty()) return;
         sendMessage(receiver, color + message);
     }
 
-    public static void sendMessage(@Nullable CommandSender receiver, String message) {
+    public static void sendMessage(@Nullable CommandSender receiver, @NotNull String message) {
+        if (message.isEmpty()) return;
         if (!(receiver instanceof Player)) {
             logToConsole(message);
             return;

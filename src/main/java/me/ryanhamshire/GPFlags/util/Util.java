@@ -23,91 +23,6 @@ import java.util.*;
 @SuppressWarnings("WeakerAccess")
 public class Util {
 
-    /**
-     * Check if server is running a minimum Minecraft version
-     *
-     * @param major Major version to check (Most likely just going to be 1)
-     * @param minor Minor version to check
-     * @return True if running this version or higher
-     */
-    public static boolean isRunningMinecraft(int major, int minor) {
-        return isRunningMinecraft(major, minor, 0);
-    }
-
-    /**
-     * Check if server is running a minimum Minecraft version
-     *
-     * @param major    Major version to check (Most likely just going to be 1)
-     * @param minor    Minor version to check
-     * @param revision Revision to check
-     * @return True if running this version or higher
-     */
-    public static boolean isRunningMinecraft(int major, int minor, int revision) {
-        String[] version = getMinecraftVersion().split("\\.");
-        int maj = Integer.parseInt(version[0]);
-        int min = Integer.parseInt(version[1]);
-        int rev;
-        try {
-            rev = Integer.parseInt(version[2]);
-        } catch (Throwable ignore) {
-            rev = 0;
-        }
-        return maj > major || min > minor || (min == minor && rev >= revision);
-    }
-
-    /**
-     * Get the Minecraft version the server is running
-     *
-     * @return Minecraft version the server is running
-     */
-    public static String getMinecraftVersion() {
-        return Bukkit.getBukkitVersion().split("-")[0];
-    }
-
-    /**
-     * Get the ItemStack form of a vehicle
-     * <p>Specifically a boat or minecart</p>
-     *
-     * @param vehicle Vehicle to get item from
-     * @return ItemStack that matches vehicle
-     */
-    public static ItemStack getItemFromVehicle(Vehicle vehicle) {
-        if (vehicle instanceof Boat) {
-            Boat boat = (Boat) vehicle;
-            return new ItemStack(boat.getBoatMaterial());
-        } else if (vehicle instanceof Minecart) {
-            Minecart cart = (Minecart) vehicle;
-            return new ItemStack(cart.getMinecartMaterial());
-        }
-        return null;
-    }
-
-    /**
-     * Check if an ItemStack is a vehicle
-     * <p>Specifically a boat or minecart</p>
-     *
-     * @param itemStack ItemStack to check
-     * @return True if item is a vehicle
-     */
-    public static boolean isAVehicle(ItemStack itemStack) {
-        switch (itemStack.getType()) {
-            case MINECART:
-            case CHEST_MINECART:
-            case COMMAND_BLOCK_MINECART:
-            case FURNACE_MINECART:
-            case HOPPER_MINECART:
-            case TNT_MINECART:
-            case BIRCH_BOAT:
-            case ACACIA_BOAT:
-            case DARK_OAK_BOAT:
-            case JUNGLE_BOAT:
-            case OAK_BOAT:
-            case SPRUCE_BOAT:
-                return true;
-        }
-        return false;
-    }
-
     public static boolean isMonster(Entity entity) {
         EntityType type = entity.getType();
         return (entity instanceof Monster || type == EntityType.GHAST || type == EntityType.MAGMA_CUBE || type == EntityType.SHULKER
@@ -292,14 +207,14 @@ public class Util {
 
     public static boolean isClaimOwner(Claim c, Player p) {
         if (c == null) return false;
-        if (c.ownerID == null) return false;
-        return c.ownerID.equals(p.getUniqueId());
+        if (c.getOwnerID() == null) return false;
+        return c.getOwnerID().equals(p.getUniqueId());
     }
 
     public static boolean shouldBypass(@NotNull Player p, @Nullable Claim c, @NotNull String basePerm) {
         if (p.hasPermission(basePerm)) return true;
         if (c == null) return p.hasPermission(basePerm + ".nonclaim");
-        if (c.ownerID == null && p.hasPermission(basePerm + ".adminclaim")) return true;
+        if (c.getOwnerID() == null && p.hasPermission(basePerm + ".adminclaim")) return true;
         if (isClaimOwner(c, p) && p.hasPermission(basePerm + ".ownclaim")) return true;
         if (canManage(c, p) && p.hasPermission(basePerm + ".manage")) return true;
         if (canBuild(c, p) && (p.hasPermission(basePerm + ".build") || p.hasPermission(basePerm + ".edit"))) return true;
@@ -363,7 +278,9 @@ public class Util {
 
         InventoryHolder holder = (InventoryHolder) vehicle;
         for (ItemStack stack : holder.getInventory()) {
-            drops.add(stack);
+            if (stack != null ) {
+                drops.add(stack);
+            }
         }
         return drops;
     }

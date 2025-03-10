@@ -278,7 +278,7 @@ public class FlagsDataStore {
         this.addDefault(defaults, Messages.NoOwnerFlag, "You cannot set both OwnerFly and OwnerMemberFly flags in one claim.", null);
 
         this.addDefault(defaults, Messages.ChangeBiomeSet, "The biome in this claim has been set to {0}. Relog to see the changes.", "0: Biome");
-        this.addDefault(defaults, Messages.ChangeBiomeUnset, "The biome in this claim has been restored. Relog to see the changes.", null);
+        this.addDefault(defaults, Messages.ChangeBiomeUnset, "You've unset the ChangeBiome flag.", null);
 
         this.addDefault(defaults, Messages.NoFlagInClaim, "This flag cannot be set in a claim.", null);
         this.addDefault(defaults, Messages.NoFlagInWorld, "This flag cannot be set for a whole world.", null);
@@ -388,6 +388,9 @@ public class FlagsDataStore {
         this.addDefault(defaults, Messages.EnableBuySubclaim, "This subclaim can now be bought for {0}.", "0: cost");
         this.addDefault(defaults, Messages.DisableBuySubclaim, "This subclaim can no longer be purchased.", null);
         this.addDefault(defaults, Messages.SubclaimPrice, "You can buy this subclaim for {0}. If you wish to do so, use /buysubclaim.", "0: cost");
+
+        this.addDefault(defaults, Messages.EnabledAllowVillagerTrading, "Players can now trade with villagers in this claim.", null);
+        this.addDefault(defaults, Messages.DisabledAllowVillagerTrading, "Players can no longer trade with villagers in this claim.", null);
 
         //load the config file
         File file = new File(messagesFilePath);
