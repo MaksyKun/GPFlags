@@ -184,6 +184,7 @@ public enum Messages {
     DisableViewContainers,
     EnableReadLecterns,
     DisableReadLecterns,
+    LecternOpened,
     EnableNoBlockGravity,
     DisableNoBlockGravity,
     EnableNoBlockForm,
@@ -276,6 +277,9 @@ public enum Messages {
 
     EnabledAllowVillagerTrading,
     DisabledAllowVillagerTrading,
+
+    EnabledRestoreGrazedGrass,
+    DisabledRestoreGrazedGrass,
 
     Prefix
 }

@@ -1,6 +1,7 @@
 package me.ryanhamshire.GPFlags.listener;
 
 import me.ryanhamshire.GPFlags.FlightManager;
+import me.ryanhamshire.GPFlags.GPFlags;
 import me.ryanhamshire.GPFlags.event.PlayerPostClaimBorderEvent;
 import me.ryanhamshire.GPFlags.event.PlayerPreClaimBorderEvent;
 import me.ryanhamshire.GPFlags.util.Util;
@@ -22,6 +23,9 @@ import org.bukkit.event.vehicle.VehicleEnterEvent;
 
 import java.util.ArrayList;
 import java.util.Set;
+
+import static me.ryanhamshire.GPFlags.FlightManager.gpfAllowsFlight;
+import static me.ryanhamshire.GPFlags.FlightManager.manageFlightLater;
 
 /**
  * Purpose is
@@ -82,9 +86,31 @@ public class PlayerListener implements Listener {
         Player player = ((Player) entity);
         Location from = player.getLocation();
         Location to = vehicle.getLocation();
-        if (flagsPreventMovement(to, from, Set.of(player))) {
+        if (flagsPreventMovement(to, from, player)) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    private void onEnterBed(PlayerBedEnterEvent event) {
+        Player player = event.getPlayer();
+        Location from = player.getLocation();
+        Location to = event.getBed().getLocation();
+        if (flagsPreventMovement(to, from, player)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    private void onLeaveBed(PlayerBedLeaveEvent event) {
+        Player player = event.getPlayer();
+        Location from = player.getLocation();
+        Bukkit.getScheduler().runTaskLater(GPFlags.getInstance(), () -> {
+            Location to = player.getLocation();
+            if (flagsPreventMovement(to, from, player)) {
+                player.teleport(from.add(0, 1, 0));
+            }
+        }, 1);
     }
 
     @EventHandler
@@ -115,6 +141,10 @@ public class PlayerListener implements Listener {
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(spawn,false, cachedClaim);
         PlayerPostClaimBorderEvent borderEvent = new PlayerPostClaimBorderEvent(event.getPlayer(), null, claim, null, spawn);
         Bukkit.getPluginManager().callEvent(borderEvent);
+    }
+
+    public static boolean flagsPreventMovement(Location to, Location from, Player player) {
+        return flagsPreventMovement(to, from, Set.of(player));
     }
 
     /**
