@@ -200,6 +200,8 @@ public class GPFlagsConfig {
             this.flagManager.registerFlagDefinition(new FlagDef_AllowWitherDamage(this.flagManager, plugin));
 
             this.flagManager.registerFlagDefinition(new FlagDef_AllowVillagerTrading(this.flagManager, plugin));
+            this.flagManager.registerFlagDefinition(new FlagDef_AllowItemFrameContents(this.flagManager, plugin));
+            this.flagManager.registerFlagDefinition(new FlagDef_AllowClaimManagersSetFlags(this.flagManager, plugin));
             this.flagManager.registerFlagDefinition(new FlagDef_RestoreGrazedGrass(this.flagManager, plugin));
 
             try {
